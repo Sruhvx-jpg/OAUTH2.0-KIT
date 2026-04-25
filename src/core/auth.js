@@ -47,7 +47,7 @@ class Oauth {
             client_id: this.config.clientId,
             client_secret: this.config.clientSecret,
             grant_type: "authorization_code",
-            redirect_uri: redirectUri,
+            redirect_uri: this.config.redirectUri,
             code: code
         }
 
