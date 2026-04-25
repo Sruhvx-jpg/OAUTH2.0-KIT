@@ -6,13 +6,13 @@ export const createOauth = (config) => {
     const oauth =  new Oauth(config)
 
     return {
-        generateState: () => oauth.generateState(),
-        generateAuthUrl: (state) => oauth.generateAuthUrl(state),
+        generateState: () => await oauth.generateState(),
+        generateAuthUrl: (state) => await oauth.generateAuthUrl(state),
         handleCallBack: async(code) => {
-            const tokenObj = oauth.exchangeToken(code)
-            const user = oauth.getUserInfo(tokenObj.access_token)
+            const tokenObj = await oauth.exchangeToken(code)
+            const user = await oauth.getUserInfo(tokenObj.access_token)
 
-            return {tokeObj, user}
+            return {tokenObj, user}
         }
     }
 }

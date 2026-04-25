@@ -1,6 +1,6 @@
 import axios from "axios"
-import crypto from "crypto";
-import { postForm } from "./httpHelper";
+import crypto from "node:crypto";
+import { postForm } from "./httpHelper.js";
 
 class Oauth {
     constructor(config){
@@ -14,9 +14,9 @@ class Oauth {
         const res = await axios.get(this.config.discoveryUrl)
 
         this.metadata = {
-            auth: res.authorization_endpoint,
-            token: res.token_endpoint,
-            userInfo: res.userinfo_endpoint
+            auth: res.data.authorization_endpoint,
+            token: res.data.token_endpoint,
+            userInfo: res.data.userinfo_endpoint
         }
 
         return this.metadata
@@ -27,7 +27,7 @@ class Oauth {
     }
 
     async generateAuthUrl(state) {
-        const endpoint = this.getMetaData()
+        const endpoint = await this.getMetaData()
 
         const params = new URLSearchParams({
             client_id: this.config.clientId,
