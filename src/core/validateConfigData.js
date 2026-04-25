@@ -8,7 +8,7 @@ export const validateConfData = (config) => {
 
     for(const key of required){
         if(!config[key]){
-            throw new Error(`CONFIG ERROR: Missing required config - ${key}`)
+            throw new Error(`ERROR 1: Missing required config - ${key}`)
         }
     }
 }
