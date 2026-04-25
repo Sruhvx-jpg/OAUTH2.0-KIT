@@ -51,9 +51,12 @@ class Oauth {
             code: code
         }
 
-        const providerFeedback = await postForm(endpoint.token, payload)
-
-        return providerFeedback.data
+        try {
+            const providerFeedback = await postForm(endpoint.token, payload)
+            return providerFeedback.data
+        } catch (error) {
+            throw new Error("ERROR 2:tokenExchange failure")
+        }
     }
 
     async getUserInfo(accessToken) {
