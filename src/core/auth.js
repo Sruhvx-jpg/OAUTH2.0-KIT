@@ -1,11 +1,19 @@
 import axios from "axios"
 import crypto from "node:crypto";
-import { postForm } from "./httpHelper.js";
+import { postMan } from "./httpHelper.js";
 
 class Oauth {
     constructor(config){
         this.metadata = null,
         this.config = config
+    }
+
+    generatePKCE(){
+        const codeVerifer = crypto.randomBytes(32).toString("base64url")
+
+        const codeChallenge = crypto.createHash("sha256").update(codeVerifer).digest("base64url") 
+
+        return {codeVerifer, codeChallenge}
     }
 
     async getMetaData () {
@@ -26,7 +34,7 @@ class Oauth {
         return crypto.randomBytes(32).toString("hex")
     }
 
-    async generateAuthUrl(state) {
+    async generateAuthUrl(state, codeChlnge) {
         const endpoint = await this.getMetaData()
 
         const params = new URLSearchParams({
@@ -34,39 +42,33 @@ class Oauth {
             redirect_uri: this.config.redirectUri,
             response_type: "code",
             scope: "openid email profile",
-            state: state
+            state: state,
+            code_challenge: codeChlnge,
+            code_challenge_method: "S256"
         });
 
         return `${endpoint.auth}?${params}`
     }
     
-    async exchangeToken(code) {
-        const endpoint =  await this.getMetaData()
-
-        const payload = {
-            client_id: this.config.clientId,
-            client_secret: this.config.clientSecret,
-            grant_type: "authorization_code",
-            redirect_uri: this.config.redirectUri,
-            code: code
-        }
+    async exchangeToken(code, codeVer) {
+        const {token} =  await this.getMetaData()
 
         try {
-            const providerFeedback = await postForm(endpoint.token, payload)
-            return providerFeedback.data
+            const res = await postMan(token, this.config, code, codeVer)
+            return res.data
         } catch (error) {
-            throw new Error("ERROR 2:tokenExchange failure")
+            throw new Error("ERROR 2: Token Exchange Failure")
         }
     }
 
     async getUserInfo(accessToken) {
-        const endpoint = await this.getMetaData()
+        const endPoint = await this.getMetaData()
 
-        const providerFeedback = await axios.get(endpoint.userInfo, {
+        const res = await axios.get(endPoint.userInfo, {
             headers: { Authorization: `Bearer ${accessToken}` }
         })
 
-        return providerFeedback.data
+        return res.data
     }
 }
 
